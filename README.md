@@ -6,22 +6,39 @@
 The code to generate the published figures is found here in the following scripts:
 
 **Figure 1A:** ordination_analysis.R
+
 **Figure 1B:** microbial_groups.R
+
 **Figure 1C:** heritability_analysis.R
+
 **Figure 3A:** gwas_analysis.R
+
 **Figure 3BC:** gene_expression_analysis.R
+
 **Figure 4:** abundance_vs_phenotype.R
+
 **Figure 5:** f_comamonadaceae_example.R
+
 **Supplementary Figure 1:** (manually drawn)
+
 **Supplementary Figure 2A:** ordination_analysis.R
+
 **Supplementary Figure 2B:** heritability_analysis.R
+
 **Supplementary Figure 3:** heritability_analysis.R
+
 **Supplementary Figure 4:** abundance_vs_phenotype.R
+
 **Supplementary Figure 5:** (manually drawn)
+
 **Supplementary Figure 6:** ordination_analysis.R
+
 **Supplementary Figure 7B:** ordination_analysis.R
+
 **Supplementary Figure 8:** microbial_groups.R
+
 **Supplementary Figure 9ABC:** ordination_analysis.R
+
 **Supplementary Figure 9DE:** gwas_analysis.R
 
 ## cache
