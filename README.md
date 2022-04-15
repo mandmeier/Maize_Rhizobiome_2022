@@ -104,6 +104,19 @@ Download this directory here (LINK) for the following files:
 **hapmap_chr10_23800k-24100k.txt:** Cutout of the  chr 10 allele information, derived from HapMap3
 
 
+## published_datasets
+
+Datasets generated in this study on the Buckler-Goodman maize diversity panel that show the associations of rhisozphere microbial groups with host genomic loci and performance in the field under two nitrogen treatments. (Also supplied as supplementary files). Please make use of these datasets in your own research (and don't forget to cite our work!).
+
+**dataset1.csv:** Feature table (3,306 samples by 3,626 ASVs) from which our results were generated, alongside the sample metadata collected in this study.
+
+**dataset2.csv:** Taxonomically annotated list of 3,626 16S sequences that comprise the core maize microbiome used for this analysis and may serve as a reference to identify the same maize-associated ASVs in future experiments.
+
+**dataset3.csv:** List of the 150 microbial groups defined in this study alongside relevant summary statistics, such as abundance, heritability, selection coefficients, and correlations with plant traits under both N treatments.
+
+**dataset4.csv:** List of 229 Buckler-Goodman maize genotypes with the corresponding measurements of all 17 plant and 150 rhizobiome traits analyzed here under both N treatments.
+
+**dataset5.csv:** List of 622 plant loci (10 kb genomic regions) that exhibit significant association with one or more microbial groups, including the IDs of nearby (+/- 10 kb) genes.
 
 
 
