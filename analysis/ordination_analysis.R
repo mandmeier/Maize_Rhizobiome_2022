@@ -2,10 +2,12 @@
 library("tidyverse")
 library("phyloseq")
 library("vegan")
+library("FactoMineR")
+library("factoextra")
 
 
 
-#### plot shannon diversity between 4632 (ps_common) and 3728 sets (ps_bothyears) ####
+#### plot Shannon diversity between 4632 (ps_common) and 3728 sets (ps_bothyears) ####
 
 load(file = "data/ps_common.rda")
 
@@ -148,5 +150,197 @@ ord_plot <- ggplot(filter(bray.cap.whole.axes, year=="Y2019"), aes(x = CAP1, y =
   theme_bw()
 
 ord_plot
+
+
+
+
+
+#### PCA for high-level rhizobiome traits, using ASV BLUPs ####
+
+
+
+
+
+## LN PCA
+asvs_logrel <- read_csv("data/blup_lowN_3618_asvs.csv")
+
+asv_table <- asvs_logrel %>%
+  #replace(is.na(.), 0) %>%
+  column_to_rownames(var = "genotype")
+
+
+res_pca_LN <- PCA(asv_table, scale.unit = FALSE, ncp = 10, graph = FALSE)
+res_pca_LN
+
+
+#sdat <- read_csv("data/BG_sample_data.csv") 
+
+#subpop <- sdat %>%
+#  dplyr::select(genotype, subpopulation) %>%
+#  unique()
+
+
+coords <- data.frame(res_pca_LN$ind$coord)
+
+plot_data_LN <- coords %>%
+  rownames_to_column(var = "genotype") %>%
+  mutate(nitrogen = "LN")
+#left_join(subpop, by = "genotype")
+
+xlab <- paste0("PC1 [", round(res_pca_LN$eig[1, c("percentage of variance")], 1),"%]" )
+ylab <- paste0("PC2 [", round(res_pca_LN$eig[2, c("percentage of variance")], 1),"%]" )
+
+pca_plot <- ggplot(plot_data_LN, aes(x = Dim.1, y = Dim.2)) + # color = subpopulation
+  geom_point(alpha = 0.5) +
+  xlab(xlab) +
+  ylab(ylab) +
+  theme_bw()
+
+pca_plot
+
+
+PCs_LN <- round(res_pca_LN$eig[1:10, c("percentage of variance")], 2)
+
+
+
+## HN PCA
+asvs_logrel <- read_csv("data/blup_stdN_3618_asvs.csv")
+
+asv_table <- asvs_logrel %>%
+  #replace(is.na(.), 0) %>%
+  column_to_rownames(var = "genotype")
+
+
+res_pca_HN <- PCA(asv_table, scale.unit = FALSE, ncp = 10, graph = FALSE)
+res_pca_HN
+
+
+
+coords <- data.frame(res_pca_HN$ind$coord)
+
+plot_data_HN <- coords %>%
+  rownames_to_column(var = "genotype") %>%
+  mutate(nitrogen = "HN")
+#left_join(subpop, by = "genotype")
+
+xlab <- paste0("PC1 [", round(res_pca_HN$eig[1, c("percentage of variance")], 1),"%]" )
+ylab <- paste0("PC2 [", round(res_pca_HN$eig[2, c("percentage of variance")], 1),"%]" )
+
+pca_plot <- ggplot(plot_data_HN, aes(x = Dim.1, y = Dim.2)) + # color = subpopulation
+  geom_point(alpha = 0.5) +
+  xlab(xlab) +
+  ylab(ylab) +
+  theme_bw()
+
+pca_plot
+
+
+PCs_HN <- round(res_pca_HN$eig[1:10, c("percentage of variance")], 2)
+
+## combine datasets for plots
+
+PCs <- data.frame("PC" = c("PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10"), "HN" = PCs_HN, "LN" = PCs_LN)
+
+PCs$PC <- factor(PCs$PC, levels = c("PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10"))
+
+## top 10 PCs, -N
+
+ggplot(PCs, aes(x = PC, y = LN)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label= paste0(round(LN, 1), "%")), size = 3 , vjust=-0.5) +
+  scale_y_continuous(limits = c(0, 25)) +
+  ylab("% variance explained") +
+  theme_bw() +
+  theme(axis.title.x = element_blank())
+
+
+## top 10 PCs, +N
+ggplot(PCs, aes(x = PC, y = HN)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label= paste0(round(HN, 1), "%")), size = 3 , vjust=-0.5) +
+  scale_y_continuous(limits = c(0, 25)) +
+  ylab("% variance explained") +
+  theme_bw() +
+  theme(axis.title.x = element_blank())
+
+
+
+
+
+load("data/asv_taxonomy.rda")
+
+
+## get ASV contributions LN
+asv_contributions_LN <- res_pca_LN$var$contrib
+
+## plot top 20 ASV contributions using library factoextra
+
+fviz_contrib(res_pca_LN, choice = "var", axes = 1, top = 20, ggtheme = theme_classic()) +
+  ggtitle("Top 20 ASVs contributing to PC1")
+
+contrib <- data.frame(asv_contributions_LN) %>%
+  rownames_to_column("ASV") %>%
+  rename(PC1 = Dim.1) %>%
+  dplyr::select(ASV, PC1) %>%
+  left_join(dplyr::select(asv_taxonomy, ASV, tax_group), by = "ASV") %>%
+  group_by(tax_group) %>%
+  summarize( contrib_to_PC1 = sum(PC1)) %>%
+  arrange(-contrib_to_PC1) %>%
+  mutate(tax_group = ifelse(contrib_to_PC1 > 1, tax_group, "other")) %>%
+  group_by(tax_group) %>%
+  summarize( contrib_to_PC1 = sum(contrib_to_PC1)) %>%
+  arrange(-contrib_to_PC1)
+
+
+lbls <- paste0(round(contrib$contrib_to_PC1, 2), "% ",contrib$tax_group)
+colors = c("Ralstonia pickettii" = "blue", "Burkholderia oklahomensis" = "lightblue", "other" = "grey", "Sphingobium herbicidovorans 1" = "red", "Dyella jiangningensis" = "orange") 
+
+
+pie(contrib$contrib_to_PC1 ,labels = lbls, col=colors,
+    main="Variance contribution to PC1")
+
+
+
+
+## get ASV contributions HN
+
+asv_contributions_HN <- res_pca_HN$var$contrib
+
+fviz_contrib(res_pca, choice = "var", axes = 2, top = 5, ggtheme = theme_classic()) +
+  ggtitle("Top 5 ASVs contributing to PC2")
+
+contrib <- data.frame(asv_contributions_HN) %>%
+  rownames_to_column("ASV") %>%
+  rename(PC1 = Dim.1) %>%
+  dplyr::select(ASV, PC1) %>%
+  left_join(dplyr::select(asv_taxonomy, ASV, tax_group), by = "ASV") %>%
+  group_by(tax_group) %>%
+  summarize( contrib_to_PC1 = sum(PC1)) %>%
+  arrange(-contrib_to_PC1) %>%
+  mutate(tax_group = ifelse(contrib_to_PC1 > 1, tax_group, "other")) %>%
+  group_by(tax_group) %>%
+  summarize( contrib_to_PC1 = sum(contrib_to_PC1)) %>%
+  arrange(-contrib_to_PC1)
+
+contrib$tax_group
+
+
+lbls <- paste0(round(contrib$contrib_to_PC1, 2), "% ",contrib$tax_group)
+colors = c("Massilia putida" = "#ffc500",
+           "Enterobacter"   = "brown",
+           "other" = "grey",
+           "Ralstonia pickettii" = "blue",
+           "Labrys miyagiensis" = "darkgreen",
+           "Sphingobium herbicidovorans 1" = "red",
+           "Acinetobacter nosocomialis"  = "purple",
+           "Kribbella karoonensis" = "#00cdac",
+           "Sphingobacterium siyangense-multivorum" = "lightgreen") 
+
+
+pie(contrib$contrib_to_PC1 ,labels = lbls, col=colors,
+    main="Variance contribution to PC1")
+
+
+
 
 
