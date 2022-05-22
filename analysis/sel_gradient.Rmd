@@ -1,0 +1,135 @@
+---
+title: "Estimate linear and quadratic selection gradients"
+output: NULL
+author: "Jinliang Yang"
+---
+
+```{r setup, include=TRUE}
+# normalize the path
+knitr::opts_knit$set(root.dir=normalizePath('..//'))
+```
+
+
+
+In this script, we computed linear and quadratic selection gradients for the microbiome traits and plant fitness related traits (yield).
+We estimated selection gradients following approached developed by Lande and Arnold, 1983 and Rausher 1991.
+Briefly, we estimated the fitness function relating fitness related traits (i.e., the BLUP values of CC collected on August 22) to the abundance of the microbial groups with a generalized additive model.
+Then, we obtained linear and quadratic selection gradients from the fitted GAM models using an R package developed by X.
+We ran a total of 300 univariate models (150 microbial groups x 2 N treatments).
+As a result, we found XXX.
+
+
+
+```{r}
+obj <- load("data/abundance_vs_phenotype.rda")
+d <- abundance_vs_phenotype
+hn <- subset(d, nitrogen %in% "HN")
+ln <- subset(d, nitrogen %in% "LN")
+dt <- as.data.frame(table(hn$ASV))
+# plant traits
+pt <- as.data.frame(table(d$phenotype)) #pt
+mt <- as.data.frame(table(d$ASV)) #150
+```
+
+
+# Install software
+
+```{r}
+install.packages("mgcv")
+install.packages("mvtnorm")
+### install from source: https://cran.r-project.org/src/contrib/Archive/gsg/
+install.packages("~/Downloads/gsg_2.0.tar.gz", repos = NULL, type="source")
+install.packages("AER")
+```
+
+-----------------
+
+# Load packages
+
+```{r}
+library(mgcv) 
+library(gsg) 
+library(AER)
+```
+
+Before running the model, microbiome data are mean-centered and variance standardized.
+
+### HN
+
+```{r}
+out <- data.frame()
+for(i in 1:nrow(mt)){
+  sub <- subset(hn, ASV %in% mt$Var1[i] & phenotype %in% "CC_Aug12")
+  m1 <- gam(blup_logrel ~ s(value), data=sub)
+  
+  fit <- gam.gradients(mod=m1, phenotype="value", standardized =F, se.method = "boot.case", n.boot=1000,
+                   refit.smooth = T)
+  
+  temp <- fit$ests
+  temp$type <- c("B", "G")
+  temp$ASV <- as.character(mt$Var1[i])
+  out <- rbind(out, temp)
+}
+write.table(out, file="cache/hn_selection_gredients.csv", sep=",", row.names = FALSE, quote=FALSE)
+out1 <- subset(out, estimates != 0)
+par(mfrow=c(2,2)) 
+gam.check(m1, pch=19, cex=.3)
+```
+
+### LN
+
+```{r}
+out <- data.frame()
+for(i in 1:nrow(mt)){
+  sub <- subset(ln, ASV %in% mt$Var1[i] & phenotype %in% "CC_Aug12")
+  m1 <- gam(blup_logrel ~ s(value), data=sub)
+  
+  fit <- gam.gradients(mod=m1, phenotype="value", standardized =F, se.method = "boot.case", n.boot=1000,
+                   refit.smooth = T)
+  
+  temp <- fit$ests
+  temp$type <- c("B", "G")
+  temp$ASV <- as.character(mt$Var1[i])
+  out <- rbind(out, temp)
+}
+out2 <- subset(out, estimates != 0)
+write.table(out, file="cache/ln_selection_gredients.csv", sep=",", row.names = FALSE, quote=FALSE)
+```
+
+------------------------
+
+# Plot the results
+
+```{r}
+hn <- read.csv("cache/hn_selection_gredients.csv")
+hn1 <- subset(hn, estimates != 0 & P.value < 0.05)
+hn1$treatment <- "HN"
+ln <- read.csv("cache/ln_selection_gredients.csv")
+ln1 <- subset(ln, estimates != 0 & P.value < 0.05)
+ln1$treatment <- "LN"
+df <- rbind(hn1, ln1)
+df1 <- subset(df, type == "B")
+write.table(df1, "data/results_linear_selection_gredients.csv", sep=",", row.names = FALSE, quote=FALSE)
+df2 <- subset(df, type == "G")
+write.table(df2, "data/quadratic_selection_gredients.csv", sep=",", row.names = FALSE, quote=FALSE)
+```
+
+
+
+```{r}
+library(ggplot2)
+p <- ggplot(df1, aes(x=ASV, y=estimates, color= treatment)) +
+  geom_point(size=4) +
+  geom_errorbar(width=0, size=1, aes(ymin=estimates-SE, ymax=estimates+SE, colour= treatment)) +
+  # + scale_color_manual("Treatment", breaks=c(1:32), values=c(rep("red",6),rep("blue",7), rep("black",13), rep("purple",6)))+
+  xlab("")+
+  ylab("Linear selection grient")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        axis.text.x = element_text(color="black", angle=90, hjust=1, vjust=0.5), panel.grid.minor = element_blank()) +
+  theme(text = element_text(size = 10)) 
+
+pdf(file="graphs/linear_selection_gradients.pdf", width=10, height=6)
+p
+dev.off()
+```
