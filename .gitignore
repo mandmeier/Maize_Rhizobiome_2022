@@ -1,3 +1,4 @@
 largedata/
 *.png
 .DS_Store
+.Rproj.user
