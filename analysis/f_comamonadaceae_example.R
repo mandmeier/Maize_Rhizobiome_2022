@@ -271,3 +271,36 @@ ggplot(filter(plot_dat_com, allele != "NA"), aes(x=nitrogen, y=value, fill=allel
         axis.ticks.y=element_blank())
 
 
+
+
+### Gen gene expression data for chr 10 locus genes
+#4 genotypes with N treatment
+
+
+locus_genes <- c("Zm00001d023838", "Zm00001d023839", "Zm00001d023840")
+
+
+
+fpkm <- read_csv("data/FPKM_Old_new_four_lines2.csv")
+colnames(fpkm)[1] <- "gene"
+
+N_plot_data <- fpkm %>%
+  filter(gene %in% locus_genes) %>%
+  ##dplyr::select(gene, contains("Root")) %>%
+  pivot_longer(-gene, names_to = "Sample", values_to = "fpkm") %>%
+  separate(Sample, c("nitrogen", "genotype", "tissue", "rep"), sep = "_") %>%
+  mutate(nitrogen = ifelse(nitrogen == "HN", "+N", "-N"))
+
+colors <- c("leaf"="#76ba1b", "Root" = "#dca85c")
+
+ggplot(N_plot_data, aes(x=nitrogen, y=fpkm, fill=tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_point(pch = 21, size = 1, position = position_jitterdodge(jitter.width = 0.1)) +
+  stat_compare_means(aes(group = tissue), label = "p.signif") +
+  ylab("gene expression (FPKM)") +
+  facet_wrap(~gene) +
+  scale_fill_manual(values = colors) +
+  theme_bw()
+
+
+

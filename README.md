@@ -11,6 +11,8 @@ The code to generate the published figures is found here in the following script
 
 **Figure 1C:** heritability_analysis.R
 
+**Figure 2:** selection_gradients.R
+
 **Figure 3A:** gwas_analysis.R
 
 **Figure 3BC:** gene_expression_analysis.R
@@ -40,6 +42,8 @@ The code to generate the published figures is found here in the following script
 **Supplementary Figure 9ABC:** ordination_analysis.R
 
 **Supplementary Figure 9DE:** gwas_analysis.R
+
+**Supplementary Figure 10:** f_comamonadaceae_example.R
 
 ## cache
 
