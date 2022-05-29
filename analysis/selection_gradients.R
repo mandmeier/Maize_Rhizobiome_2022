@@ -1,4 +1,0 @@
-# calculation of selection gradients
-
-
-
