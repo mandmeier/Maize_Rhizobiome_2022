@@ -11,7 +11,19 @@ The code to generate the published figures is found here in the following script
 
 **Figure 1C:** heritability_analysis.R
 
+**Figure 1 - figure supplement 1ABC:** ordination_analysis.R
+
+**Figure 1 - figure supplement 1DE:** gwas_analysis.R
+
+**Figure 1 - figure supplement 2A:** ordination_analysis.R
+
+**Figure 1 - figure supplement 2B:** heritability_analysis.R
+
+**Figure 1 - figure supplement 3:** heritability_analysis.R
+
 **Figure 2:** selection_analysis.R
+
+**Figure 2 - figure supplement 1** selection_analysis.R
 
 **Figure 3A:** gwas_analysis.R
 
@@ -19,33 +31,25 @@ The code to generate the published figures is found here in the following script
 
 **Figure 4:** abundance_vs_phenotype.R
 
+**Figure 4 - figure supplement 1** abundance_vs_phenotype.R
+
+**Figure 4 - figure supplement 2:** (manually drawn)
+
 **Figure 5:** f_comamonadaceae_example.R
 
-**Supplementary Figure 1:** (manually drawn)
+**Figure 5 - figure supplement 1** f_comamonadaceae_example.R
 
-**Supplementary Figure 2A:** ordination_analysis.R
+**Figure 6:** (manually drawn)
 
-**Supplementary Figure 2B:** heritability_analysis.R
+**Figure 7:** ordination_analysis.R
 
-**Supplementary Figure 3:** heritability_analysis.R
+**Figure 7 - figure supplement 1:** ordination_analysis.R
 
-**Supplementary Figure 4:** abundance_vs_phenotype.R
+**Figure 8:** microbial_groups.R
 
-**Supplementary Figure 5:** (manually drawn)
 
-**Supplementary Figure 6:** ordination_analysis.R
 
-**Supplementary Figure 7B:** ordination_analysis.R
 
-**Supplementary Figure 8:** microbial_groups.R
-
-**Supplementary Figure 9ABC:** ordination_analysis.R
-
-**Supplementary Figure 9DE:** gwas_analysis.R
-
-**Supplementary Figure 10:** f_comamonadaceae_example.R
-
-**Supplementary Figure 11:** selection_analysis.R
 
 ## cache
 
